@@ -1,0 +1,103 @@
+@startuml
+interface IPublisher {
+  subscribe(s: ISubscriber)
+  unsubscribe(s: ISubscriber)
+  notifySubscribers()
+}
+interface ISubscriber {
+    update(): void
+}
+class Model implements IPublisher {
+  + lookCoordinates: Vector3
+  + positionCoordinates: Vector3
+  + ground: Ground
+  + axesHelperLength: number
+  + maze: Wall[] = []
+  + skyboxTexturePath: string
+  + goal: Goal
+  + enemy: Enemy
+  + isFlashlightTurnedOn: boolean = true
+  - _subscribers: ISubscriber[] = []
+
+  + toggleFlashlight(): void
+  + setPosition(position: Vector3): void
+  + subscribe(subscriber: ISubscriber): void
+  + unsubscribe(subscriber: ISubscriber): void
+  + notifySubscribers(): void
+  - _isPositionInWall(position: Vector3, wall: Wall): boolean
+  - _isGoalAchieved(position: Vector3): boolean
+  - _isMetEnemy(position: Vector3): boolean
+  - _resetPosition(): void
+}
+class Enemy {
+    + width: number
+    + height: number
+    + position: Vector3
+    + texturePath: string
+}
+class Goal {
+    position: Vector3
+    radius: number
+    texturePath: string
+}
+class Ground {
+    + width: number
+    + height: number
+    + texturePath: string
+}
+class MazeGenerator {
+    {static} - GenerateBox(position: Vector2, texturePath: string, isRigid: boolean): void
+    {static} + GenerateMaze(maze: number[][]): Wall[]
+}
+class Wall {
+    + width: number
+    + height: number
+    + startCoordinate: Vector2
+    + texturePath: string
+    + isRigid: boolean
+}
+class Vector3 {
+    + x: number
+    + y: number
+    + z: number
+}
+class Vector2 {
+    + x: number
+    + y: number
+}
+Wall o-- Vector2
+Goal o-- Vector3
+Enemy o-- Vector3
+Model o-- Vector3
+Model o-- Ground
+Model o-- Wall
+Model o-- Goal
+Model o-- Enemy
+Model o-- ISubscriber
+class View implements ISubscriber {
+  - _model: Model
+  - _controller: Controller
+
+  + drawThreeJSScene(): void
+  + update(): void
+}
+class ThreeJSSceneDrawer {
+  {static} + DrawGround(scene: THREE.Scene, ground: Ground)
+  {static} + DrawMoonLight(scene: THREE.Scene): void
+  {static} + DrawFlashlightToTheCamera(camera: THREE.Camera): THREE.SpotLigh
+  {static} + DrawMaze(scene: THREE.Scene, mazeWalls: Wall[]): void
+  {static} + DrawFog(scene: THREE.Scene): void
+  {static} + DrawSkybox(scene: THREE.Scene, texturePath: string): void
+  {static} + DrawGoal(scene: THREE.Scene, goal: Goal): void
+  {static} + DrawEnemy(scene: THREE.Scene, enemy: Enemy): void
+}
+View o-- Model
+View ..> ThreeJSSceneDrawer
+class Controller {
+  - _model: Model
+  + addKeyboardListeners(controls: PointerLockControls): void
+}
+View o-- Controller
+Controller o-- Model
+
+@enduml

@@ -1,0 +1,1 @@
+call npx tsc --outDir dist --lib ES6,DOM,es2017 --module ES6 src/solution.ts
